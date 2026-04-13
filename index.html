@@ -6,98 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0D0D0D">
-<meta name="apple-mobile-web-app-title" content="Lançador">
-<title>Lançador</title>
-<link id="favicon" rel="icon" type="image/png">
-<link id="apple-icon" rel="apple-touch-icon">
-<script>
-// Gera ícone via canvas — funciona sem arquivos externos
-(function(){
-  function makeIcon(size) {
-    const c = document.createElement('canvas');
-    c.width = c.height = size;
-    const ctx = c.getContext('2d');
-    const r = size * 0.18;
-
-    // Fundo arredondado dark
-    ctx.beginPath();
-    ctx.moveTo(r, 0);
-    ctx.lineTo(size-r, 0);
-    ctx.quadraticCurveTo(size, 0, size, r);
-    ctx.lineTo(size, size-r);
-    ctx.quadraticCurveTo(size, size, size-r, size);
-    ctx.lineTo(r, size);
-    ctx.quadraticCurveTo(0, size, 0, size-r);
-    ctx.lineTo(0, r);
-    ctx.quadraticCurveTo(0, 0, r, 0);
-    ctx.closePath();
-    ctx.fillStyle = '#0D0D0D';
-    ctx.fill();
-
-    // Gradiente laranja→verde (acento do app)
-    const grad = ctx.createLinearGradient(size*0.15, size*0.15, size*0.85, size*0.85);
-    grad.addColorStop(0, '#C8522A');
-    grad.addColorStop(1, '#2A9B5A');
-
-    const cx = size / 2;
-    const cy = size / 2;
-    const s  = size * 0.28;  // meio tamanho do símbolo
-
-    // Símbolo: cifrão estilizado — linha vertical + dois traços horizontais curvos
-    ctx.strokeStyle = grad;
-    ctx.lineWidth   = size * 0.085;
-    ctx.lineCap     = 'round';
-    ctx.lineJoin    = 'round';
-
-    // Linha vertical central
-    ctx.beginPath();
-    ctx.moveTo(cx, cy - s * 1.35);
-    ctx.lineTo(cx, cy + s * 1.35);
-    ctx.stroke();
-
-    // S do cifrão (arco superior)
-    ctx.beginPath();
-    ctx.arc(cx, cy - s * 0.52, s * 0.62, Math.PI * 0.18, Math.PI * 1.18, false);
-    ctx.stroke();
-
-    // S do cifrão (arco inferior, espelhado)
-    ctx.beginPath();
-    ctx.arc(cx, cy + s * 0.52, s * 0.62, Math.PI * 1.18, Math.PI * 0.18, true);
-    ctx.stroke();
-
-    return c.toDataURL('image/png');
-  }
-
-  window.addEventListener('DOMContentLoaded', function() {
-    const ico32  = makeIcon(32);
-    const ico192 = makeIcon(192);
-    const ico512 = makeIcon(512);
-
-    document.getElementById('favicon').href    = ico32;
-    document.getElementById('apple-icon').href = ico192;
-
-    // Manifest dinâmico
-    const manifest = {
-      name: 'Lançador Financeiro',
-      short_name: 'Lançador',
-      start_url: './',
-      display: 'standalone',
-      background_color: '#0D0D0D',
-      theme_color: '#0D0D0D',
-      orientation: 'portrait',
-      icons: [
-        { src: ico192, sizes: '192x192', type: 'image/png' },
-        { src: ico512, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
-      ]
-    };
-    const blob = new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'});
-    const url  = URL.createObjectURL(blob);
-    const link = document.createElement('link');
-    link.rel = 'manifest'; link.href = url;
-    document.head.appendChild(link);
-  });
-})();
-</script>
+<title>Lançar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -235,9 +144,102 @@ select option{background:#1a1a1a;color:#fff}
 /* import/export section */
 .backup-section{margin-top:8px}
 .backup-section .lbl{margin-top:0}
+
+/* ── SPLASH SCREEN ─────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Great+Vibes&display=swap');
+
+#splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle, #1a1a1a 0%, #050505 100%);
+  transition: opacity .6s ease, visibility .6s ease;
+}
+#splash.hide {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.sp-card {
+  position: relative;
+  text-align: center;
+  padding: 60px 50px;
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  animation: sp-in .7s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes sp-in {
+  from { opacity:0; transform: scale(.88); }
+  to   { opacity:1; transform: scale(1); }
+}
+.sp-bg-symbol {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 260px;
+  font-family: 'Playfair Display', serif;
+  color: rgba(255, 215, 0, 0.07);
+  user-select: none;
+  pointer-events: none;
+}
+.sp-content { position: relative; z-index: 2; }
+.sp-initials {
+  font-family: 'Playfair Display', serif;
+  font-size: 80px;
+  font-weight: 700;
+  background: linear-gradient(45deg, #ffd700, #ffae00, #fff3b0, #d4af37);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 5px;
+  margin-bottom: 10px;
+}
+.sp-divider {
+  width: 80px; height: 2px;
+  background: linear-gradient(90deg, transparent, #ffd700, transparent);
+  margin: 18px auto;
+}
+.sp-message {
+  font-family: 'Great Vibes', cursive;
+  font-size: 28px;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(255,255,255,.3);
+  max-width: 340px;
+  line-height: 1.5;
+}
+.sp-footer {
+  margin-top: 22px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: #d4af37;
+  opacity: .7;
+  font-family: 'Montserrat', sans-serif;
+}
 </style>
 </head>
 <body>
+
+<!-- ═══ SPLASH SCREEN ═══ -->
+<div id="splash">
+  <div class="sp-card">
+    <div class="sp-bg-symbol">$</div>
+    <div class="sp-content">
+      <div class="sp-initials">A &amp; F</div>
+      <div class="sp-divider"></div>
+      <div class="sp-message">
+        "Nosso amor é o investimento mais valioso,<br>
+        e o nosso futuro é a nossa maior riqueza."
+      </div>
+      <div class="sp-footer">Para todo o sempre</div>
+    </div>
+  </div>
+</div>
 
 <!-- ═══ SCREEN: LANÇAR ═══ -->
 <div class="screen" id="s-main">
@@ -1095,6 +1097,24 @@ function removeMeio(i) {
   CFG.meios.splice(i,1);
   saveAll(); populateAll(); renderSettings();
 }
+
+// ══════════════════════════════════════════════════════════════
+//  START
+// ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+//  SPLASH SCREEN
+// ══════════════════════════════════════════════════════════════
+(function() {
+  var splash = document.getElementById("splash");
+  setTimeout(function() {
+    splash.classList.add("hide");
+    setTimeout(function() { splash.remove(); }, 700);
+  }, 2200);
+  splash.addEventListener("click", function() {
+    splash.classList.add("hide");
+    setTimeout(function() { splash.remove(); }, 700);
+  });
+})();
 
 // ══════════════════════════════════════════════════════════════
 //  START
